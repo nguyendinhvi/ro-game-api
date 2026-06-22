@@ -10,6 +10,21 @@ const getEnv = (key: string, defaultValue?: string): string => {
   return value;
 };
 
+const DEFAULT_CORS_ORIGINS = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'https://rogame.space',
+  'https://www.rogame.space',
+];
+
+function parseCorsOrigins(): string[] {
+  const raw = process.env.CORS_ORIGINS;
+  if (!raw?.trim()) return DEFAULT_CORS_ORIGINS;
+  return raw.split(',').map((origin) => origin.trim()).filter(Boolean);
+}
+
 export const env = {
   nodeEnv: getEnv('NODE_ENV', 'development'),
   port: parseInt(getEnv('PORT', '3000'), 10),
@@ -18,4 +33,5 @@ export const env = {
   jwtExpiresIn: getEnv('JWT_EXPIRES_IN', '7d'),
   googleClientId: getEnv('GOOGLE_CLIENT_ID', ''),
   googleClientSecret: getEnv('GOOGLE_CLIENT_SECRET', ''),
+  corsOrigins: parseCorsOrigins(),
 } as const;

@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import { env } from "./config";
 import { routes } from "./routes";
 import { errorHandler, notFoundHandler } from "./middleware";
 
@@ -7,12 +8,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://127.0.0.1:3000",
-      "http://localhost:5173",
-      "http://127.0.0.1:5173",
-    ],
+    origin: env.corsOrigins,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: [
       "Content-Type",
