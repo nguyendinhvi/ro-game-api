@@ -1,0 +1,50 @@
+name: Deploy API
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ vars.MAIN_HOST }}
+          username: ${{ vars.MAIN_USERNAME }}
+          password: ${{ secrets.MAIN_PASSWORD }}
+          port: 22
+          command_timeout: 15m
+          script: |
+            set -euo pipefail
+
+            APP_DIR="/root/projects/rogame/ro-game-api"
+            PM2_NAME="ro-game-api"
+
+            echo ">>> Deploying to ${APP_DIR}"
+
+            cd "${APP_DIR}"
+
+            git fetch origin main
+            git reset --hard origin/main
+
+            npm install
+            npm run build
+
+            if pm2 describe "${PM2_NAME}" > /dev/null 2>&1; then
+              pm2 restart "${PM2_NAME}"
+            else
+              pm2 start dist/server.js --name "${PM2_NAME}"
+            fi
+
+            pm2 save
+
+            echo ">>> Deploy finished"
